@@ -34,7 +34,7 @@ Using AzureADDeviceCleanup PowerShell script, you can automate Azure AD devices 
 
  
 
-Extremely Important Notes:
+#### Extremely Important Notes:
   - This source code is freeware and is provided on an "as is" basis without warranties of any kind, 
     whether express or implied, including without limitation warranties that the code is free of defect,
     fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of
@@ -50,6 +50,17 @@ Extremely Important Notes:
     before deleting a stale device.
   - For more information, kindly visit the link:
     https://docs.microsoft.com/en-us/azure/active-directory/devices/manage-stale-devices
+
+
+#### User experience:
+
+- Execute the PowerShell: 
+
+![PS output](https://github.com/mzmaili/AzureADDeviceCleanup/blob/master/PS.PNG)
+
+- Excel output: 
+![CSVReport](https://github.com/mzmaili/AzureADDeviceCleanup/blob/master/Untitled.png)
+
 
 ```azurepowershell
  .SYNOPSIS 
