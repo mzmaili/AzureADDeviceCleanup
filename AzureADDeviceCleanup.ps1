@@ -76,7 +76,7 @@ Extremely Important Notes:
 
 .EXAMPLE
     .\AzureADDeviceCleanup.ps1 -Verify
-    Verifies the stale devices since 90 says that will be deleted when running the PowerShell with 'CleanDevices' parameter.
+    Verifies the stale devices since 180 says that will be deleted when running the PowerShell with 'CleanDevices' parameter.
 
 .EXAMPLE
     .\AzureADDeviceCleanup.ps1 -Verify -ThresholdDays <Number of Days>
@@ -107,8 +107,8 @@ Script Output:
 ===================================
 |Azure AD Devices Cleanup Summary:|
 ===================================
-Number of affected devices: 16
-Last Login verified: 5/31/2019 2:32:37 PM
+Number of affected devices: 8
+Last Login verified: 03-07-2021 00:34:42
 #>
 
 
