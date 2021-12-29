@@ -1,4 +1,4 @@
-﻿<# 
+<# 
 
 Extremely Important Notes:
 =========================================================================================================
@@ -29,11 +29,17 @@ Extremely Important Notes:
 
 .AUTHOR:
     Mohammad Zmaili
-
+    
+.Version
+    1.1
+    
+.Modified By    
+    Sumanjit Pan
+    
 .PARAMETER
     ThresholdDays
     Specifies the period of the last login.
-    Note: The default value is 90 days if this parameter is not configured.
+    Note: The default value is 180 days if this parameter is not configured.
 
 .PARAMETER
     Verify
@@ -109,7 +115,7 @@ Last Login verified: 5/31/2019 2:32:37 PM
 [cmdletbinding()]
 param(
         [Parameter( Mandatory=$false)]
-        [Int]$ThresholdDays =90,
+        [Int]$ThresholdDays = 180,
 
         [Parameter( Mandatory=$false)]
         [switch]$Verify,
@@ -155,83 +161,51 @@ exit
 }
 }
 
-Function CheckMSOnline{
+Function CheckAzureAd{
 ''
-Write-Host "Checking MSOnline Module..." -ForegroundColor Yellow
+Write-Host "Checking AzureAd Module..." -ForegroundColor Yellow
                             
-    if (Get-Module -ListAvailable -Name MSOnline) {
-        Import-Module MSOnline
-        Write-Host "MSOnline Module has imported." -ForegroundColor Green -BackgroundColor Black
-        ''
-
-            Write-Host "Checking MSOnline version..." -ForegroundColor Yellow
-            $MVersion = Get-Module msonline | Select-Object version
-            if (($MVersion.Version.Major -eq 1) -and ($MVersion.Version.Minor -eq 1) -and ($MVersion.Version.Build -ge 183)){
-                Write-Host "You have a supported version." -ForegroundColor Green -BackgroundColor Black
-            }else{
-                Write-Host "You have an old version." -ForegroundColor Red -BackgroundColor Black
-                ''
-                Write-Host "Updating MSOnline version..." -ForegroundColor Yellow
-                Update-Module msonline -force
-                Remove-Module msonline
-                Import-Module msonline
-                $MVersion = Get-Module msonline | Select-Object version
-                if (($MVersion.Version.Major -eq 1) -and ($MVersion.Version.Minor -eq 1) -and ($MVersion.Version.Build -ge 183)){
-                Write-Host "MSOnline Module has been updated. Please reopen PowerShell window." -ForegroundColor Green -BackgroundColor Black
-                exit
-                }else{
-                Write-Host "Operation aborted. MSOnline module has not updated, please make sure you are running PowerShell as admin." -ForegroundColor red -BackgroundColor Black
-                exit
-                }
-
-            }
-
-        ''
-        Write-Host "Connecting to MSOnline..." -ForegroundColor Yellow
-        
-        if ($SavedCreds){
-            Connect-MsolService -Credential $UserCreds -ErrorAction SilentlyContinue
-        }else{
-            Connect-MsolService -ErrorAction SilentlyContinue
-        }
-
-        if (-not (Get-MsolCompanyInformation -ErrorAction SilentlyContinue)){
-            Write-Host "Operation aborted. Unable to connect to MSOnline, please check you entered a correct credentials and you have the needed permissions." -ForegroundColor red -BackgroundColor Black
-            exit
-        }
-        Write-Host "Connected to MSOnline successfully." -ForegroundColor Green -BackgroundColor Black
-        ''
-    } else {
-        Write-Host "MSOnline Module is not installed." -ForegroundColor Red -BackgroundColor Black
-        Write-Host "Installing MSOnline Module....." -ForegroundColor Yellow
-        CheckInternet
-        Install-Module MSOnline -force
+    if (Get-Module -ListAvailable | where {$_.Name -like "*AzureAD*"}) 
+    {
+    Write-Host "AzureAD Module has installed." -ForegroundColor Green
+    Import-Module AzureAD
+    Write-Host "AzureAD Module has imported." -ForegroundColor Cyan
+    ''
+    ''
+    } else 
+    {
+    Write-Host "AzureAD Module is not installed." -ForegroundColor Red
+    ''
+    Write-Host "Installing AzureAD Module....." -ForegroundColor Yellow
+    Install-Module AzureAD -Force
                                 
-        if (Get-Module -ListAvailable -Name MSOnline) {                                
-        Write-Host "MSOnline Module has installed." -ForegroundColor Green -BackgroundColor Black
-        Import-Module MSOnline
-        Write-Host "MSOnline Module has imported." -ForegroundColor Green -BackgroundColor Black
-        ''
-        Write-Host "Connecting to MSOnline..." -ForegroundColor Yellow
-        Connect-MsolService -ErrorAction SilentlyContinue
-        
-        if (-not (Get-MsolCompanyInformation -ErrorAction SilentlyContinue)){
-            Write-Host "Operation aborted. Unable to connect to MSOnline, please check you entered a correct credentials and you have the needed permissions." -ForegroundColor red -BackgroundColor Black
-            exit
-        }
-        Write-Host "Connected to MSOnline successfully." -ForegroundColor Green -BackgroundColor Black
-        ''
-        } else {
-        ''
-        ''
-        Write-Host "Operation aborted. MsOnline was not installed." -ForegroundColor red -BackgroundColor Black
-        exit
-        }
+    if (Get-Module -ListAvailable | where {$_.Name -like "*AzureAD*"}) {                                
+    Write-Host "AzureAD Module has installed." -ForegroundColor Green
+    Import-Module AzureAD
+    Write-Host "AzureAD Module has imported." -ForegroundColor Cyan
+    ''
+    ''
+    } else
+    {
+    ''
+    ''
+    Write-Host "Operation aborted. AzureAD Module was not installed." -ForegroundColor Red
+    Exit}
     }
 
+Write-Host "Connecting to AzureAD PowerShell..." -ForegroundColor Magenta
 
+        if ($SavedCreds){
+            $AzureAd = Connect-AzureAD -Credential $UserCreds -ErrorAction SilentlyContinue
+        }else{
+            $AzureAd = Connect-AzureAD -ErrorAction SilentlyContinue
+        }
+Write-Host "User $($AzureAd.Account) has connected to $($AzureAd.TenantDomain) AzureCloud tenant successfully." -ForegroundColor Green
+''
+''
 
-}
+    }
+
 
 Function CheckImportExcel{
 Write-Host "Checking ImportExcel Module..." -ForegroundColor Yellow
@@ -256,7 +230,7 @@ Write-Host "Checking ImportExcel Module..." -ForegroundColor Yellow
         } else {
         ''
         ''
-        Write-Host "Operation aborted. ImportExcel was not installed." -ForegroundColor red -BackgroundColor Black
+        Write-Host "Operation aborted. ImportExcel was not installed." -ForegroundColor Red -BackgroundColor Black
         exit
         }
     }
@@ -293,63 +267,63 @@ Write-Host "https://docs.microsoft.com/en-us/azure/active-directory/devices/mana
 
 "===================================================================================================="
 ''
-CheckMSOnline
+CheckAzureAd
 
 CheckImportExcel
 
 
 
-$global:lastLogon = [datetime](get-date).AddDays(- $ThresholdDays)
+$Global:LastLogon = [datetime](get-date).AddDays(- $ThresholdDays)
 
 $Date=("{0:s}" -f (get-date)).Split("T")[0] -replace "-", ""
 $Time=("{0:s}" -f (get-date)).Split("T")[1] -replace ":", ""
 
-$date2=("{0:s}" -f ($global:lastLogon)).Split("T")[0] -replace "-", ""
+$LastLogin = ("{0:s}" -f ($LastLogon)).Split("T")[0] -replace "-", ""
 
-$workSheetName = "AADDevicesOlderthen-" + $date2
+$WorkSheetName = "AADDevicesOlderthan-" + $LastLogin
 
 
 if ($Verify){
-    Write-Host "Verifing stale devices older than"$global:lastLogon -ForegroundColor Yellow
-    $filerep = "AzureADDevicesList_" + $Date + $Time + ".xlsx"  
-    $rep=Get-MsolDevice -all -ReturnRegisteredOwners -LogonTimeBefore $global:lastLogon | select Enabled, ObjectId, DeviceId, DisplayName, DeviceOsType, DeviceOsVersion, DeviceTrustType, DeviceTrustLevel, ApproximateLastLogonTimestamp, DirSyncEnabled, LastDirSyncTime, @{Name=’Registeredowners’;Expression={[string]::join(“;”, ($_.Registeredowners))}}
-    $rep | Export-Excel -workSheetName $workSheetName -path $filerep -ClearSheet -TableName "AADDevicesTable" -AutoSize
-    $global:AffectedDevices = $rep.Count
+    Write-Host "Verifing stale devices older than"$Global:LastLogon -ForegroundColor Yellow
+    $FileReport = "AzureADDevicesList_" + $Date + $Time + ".xlsx"
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {$_.ApproximateLastLogonTimeStamp -le $Global:LastLogon} | Select-Object -Property DisplayName, AccountEnabled, DeviceId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
+    $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Verification Completed." -ForegroundColor Green -BackgroundColor Black
 }elseif ($VerifyDisabledDevices){
-    Write-Host "Verifing stale disabled devices older than"$global:lastLogon -ForegroundColor Yellow
-    $filerep = "DisabledDevices_" + $Date + $Time + ".xlsx"  
-    $rep=Get-MsolDevice -all -ReturnRegisteredOwners -LogonTimeBefore $global:lastLogon | where{$_.Enabled -eq $false} | select Enabled, ObjectId, DeviceId, DisplayName, DeviceOsType, DeviceOsVersion, DeviceTrustType, DeviceTrustLevel, ApproximateLastLogonTimestamp, DirSyncEnabled, LastDirSyncTime, @{Name=’Registeredowners’;Expression={[string]::join(“;”, ($_.Registeredowners))}} 
-    $rep | Export-Excel -workSheetName $workSheetName -path $filerep -ClearSheet -TableName "AADDevicesTable" -AutoSize
-    $global:AffectedDevices = $rep.Count
+    Write-Host "Verifing stale disabled devices older than"$Global:LastLogon -ForegroundColor Yellow
+    $FileReport = "DisabledDevices_" + $Date + $Time + ".xlsx"  
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, DeviceId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
+    $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Task Completed Successfully." -ForegroundColor Green -BackgroundColor Black
 }elseif ($DisableDevices){
-    Write-Host "Disabling stale devices older than"$global:lastLogon -ForegroundColor Yellow
-    $filerep = "DisabledDevices_" + $Date + $Time + ".xlsx"  
-    $rep=Get-MsolDevice -all -ReturnRegisteredOwners -LogonTimeBefore $global:lastLogon | where{$_.Enabled -eq $true} | select ObjectId, DeviceId, DisplayName, DeviceOsType, DeviceOsVersion, DeviceTrustType, DeviceTrustLevel, ApproximateLastLogonTimestamp, DirSyncEnabled, LastDirSyncTime, @{Name=’Registeredowners’;Expression={[string]::join(“;”, ($_.Registeredowners))}} 
-    $rep | Disable-MsolDevice -Force
-    $rep | Export-Excel -workSheetName $workSheetName -path $filerep -ClearSheet -TableName "AADDevicesTable" -AutoSize
-    $global:AffectedDevices = $rep.Count
+    Write-Host "Disabling stale devices older than"$Global:LastLogon -ForegroundColor Yellow
+    $FileReport = "DisabledDevices_" + $Date + $Time + ".xlsx"
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $true)} | Select-Object -Property DisplayName, AccountEnabled, DeviceId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport | Set-AzureADDevice -AccountEnabled $false
+    $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
+    $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Task Completed Successfully." -ForegroundColor Green -BackgroundColor Black
 }elseif ($CleanDisabledDevices){
-    Write-Host "Cleaning STALE DISABLED devices older than"$global:lastLogon -ForegroundColor Yellow
-    $filerep = "CleanedDevices_" + $Date + $Time + ".xlsx"  
-    $rep=Get-MsolDevice -all -ReturnRegisteredOwners -LogonTimeBefore $global:lastLogon | where{$_.Enabled -eq $false} | select ObjectId, DeviceId, DisplayName, DeviceOsType, DeviceOsVersion, DeviceTrustType, DeviceTrustLevel, ApproximateLastLogonTimestamp, DirSyncEnabled, LastDirSyncTime, @{Name=’Registeredowners’;Expression={[string]::join(“;”, ($_.Registeredowners))}} 
-    $rep | Remove-MsolDevice -Force
-    $rep | Export-Excel -workSheetName $workSheetName -path $filerep -ClearSheet -TableName "AADDevicesTable" -AutoSize
-    $global:AffectedDevices = $rep.Count
+    Write-Host "Cleaning STALE DISABLED devices older than"$Global:LastLogon -ForegroundColor Yellow
+    $FileReport = "CleanedDevices_" + $Date + $Time + ".xlsx"  
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, DeviceId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport | Remove-AzureADDevice
+    $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
+    $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Task Completed Successfully." -ForegroundColor Green -BackgroundColor Black
 
 }elseif ($CleanDevices){
-    Write-Host "Cleaning STALE devices older than"$global:lastLogon -ForegroundColor Yellow
-    $filerep = "CleanedDevices_" + $Date + $Time + ".xlsx"  
-    $rep=Get-MsolDevice -all -ReturnRegisteredOwners -LogonTimeBefore $global:lastLogon | select ObjectId, DeviceId, DisplayName, DeviceOsType, DeviceOsVersion, DeviceTrustType, DeviceTrustLevel, ApproximateLastLogonTimestamp, DirSyncEnabled, LastDirSyncTime, @{Name=’Registeredowners’;Expression={[string]::join(“;”, ($_.Registeredowners))}} 
-    $rep | Remove-MsolDevice -Force
-    $rep | Export-Excel -workSheetName $workSheetName -path $filerep -ClearSheet -TableName "AADDevicesTable" -AutoSize
-    $global:AffectedDevices = $rep.Count
+    Write-Host "Cleaning STALE devices older than"$Global:LastLogon -ForegroundColor Yellow 
+    $FileReport = "CleanedDevices_" + $Date + $Time + ".xlsx"
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {$_.ApproximateLastLogonTimeStamp -le $Global:LastLogon} | Select-Object -Property DisplayName, AccountEnabled, DeviceId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport | Remove-AzureADDevice
+    $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
+    $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Task Completed Successfully." -ForegroundColor Green -BackgroundColor Black
 }else{
-    Write-Host "Operation aborted. You have not select any parameter, please make sure to select any of the following parameters:" -ForegroundColor red -BackgroundColor Black
+    Write-Host "Operation aborted. You have not select any parameter, please make sure to select any of the following parameters:" -ForegroundColor Red
 
     Write-Host "
 Verify
@@ -373,7 +347,7 @@ Removed the stale devices as per the configured threshold.
 
 
 if ($OnScreenReport) {
-    $rep | Out-GridView -Title "Hybrid Devices Health Check Report"
+    $DeviceReport | Out-GridView -Title "Hybrid Devices Health Check Report"
 }
 
 
@@ -382,9 +356,9 @@ if ($OnScreenReport) {
 Write-Host "==================================="
 Write-Host "|Azure AD Devices Cleanup Summary:|"
 Write-Host "==================================="
-Write-Host "Number of affected devices:" $global:AffectedDevices
-Write-Host "Last Login verified:" $global:lastLogon
+Write-Host "Number of affected devices:" $Global:AffectedDevices
+Write-Host "Last Login verified:" $Global:LastLogon
 ''
-$loc=Get-Location
-Write-host $filerep "report has been created on the path:" $loc -ForegroundColor green -BackgroundColor Black
+$Loc = Get-Location
+Write-host $FileReport "report has been created on the path:" $Loc -ForegroundColor Green -BackgroundColor Black
 ''
