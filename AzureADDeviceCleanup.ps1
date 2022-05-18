@@ -286,21 +286,21 @@ $WorkSheetName = "AADDevicesOlderthan-" + $LastLogin
 if ($Verify){
     Write-Host "Verifing stale devices older than"$Global:LastLogon -ForegroundColor Yellow
     $FileReport = "AzureADDevicesList_" + $Date + $Time + ".xlsx"
-    $DeviceReport = Get-AzureADDevice -All:$true | Where {$_.ApproximateLastLogonTimeStamp -le $Global:LastLogon} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.ApproximateLastLogonTimeStamp -ne $Null)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
     $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
     $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Verification Completed." -ForegroundColor Green -BackgroundColor Black
 }elseif ($VerifyDisabledDevices){
     Write-Host "Verifing stale disabled devices older than"$Global:LastLogon -ForegroundColor Yellow
     $FileReport = "DisabledDevices_" + $Date + $Time + ".xlsx"  
-    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.ApproximateLastLogonTimeStamp -ne $Null) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
     $DeviceReport | Export-Excel -workSheetName $WorkSheetName -path $FileReport -ClearSheet -TableName "AADDevicesTable" -AutoSize
     $Global:AffectedDevices = $DeviceReport.Count
     Write-Host "Task Completed Successfully." -ForegroundColor Green -BackgroundColor Black
 }elseif ($DisableDevices){
     Write-Host "Disabling stale devices older than"$Global:LastLogon -ForegroundColor Yellow
     $FileReport = "DisabledDevices_" + $Date + $Time + ".xlsx"
-    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $true)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.ApproximateLastLogonTimeStamp -ne $Null) -and ($_.AccountEnabled -eq $true)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
     foreach ($Device in $DeviceReport) {
     Set-AzureADDevice -ObjectId $Device.ObjectId -AccountEnabled $false
     }
@@ -310,7 +310,7 @@ if ($Verify){
 }elseif ($CleanDisabledDevices){
     Write-Host "Cleaning STALE DISABLED devices older than"$Global:LastLogon -ForegroundColor Yellow
     $FileReport = "CleanedDevices_" + $Date + $Time + ".xlsx"  
-    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.ApproximateLastLogonTimeStamp -ne $Null) -and ($_.AccountEnabled -eq $false)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
     foreach ($Device in $DeviceReport) {
     Remove-AzureADDevice -ObjectId $Device.ObjectId
     }
@@ -321,7 +321,7 @@ if ($Verify){
 }elseif ($CleanDevices){
     Write-Host "Cleaning STALE devices older than"$Global:LastLogon -ForegroundColor Yellow 
     $FileReport = "CleanedDevices_" + $Date + $Time + ".xlsx"
-    $DeviceReport = Get-AzureADDevice -All:$true | Where {$_.ApproximateLastLogonTimeStamp -le $Global:LastLogon} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
+    $DeviceReport = Get-AzureADDevice -All:$true | Where {($_.ApproximateLastLogonTimeStamp -le $Global:LastLogon) -and ($_.ApproximateLastLogonTimeStamp -ne $Null)} | Select-Object -Property DisplayName, AccountEnabled, ObjectId, DeviceOSType, DeviceOSVersion, DeviceTrustType, ApproximateLastLogonTimestamp
     foreach ($Device in $DeviceReport) {
     Remove-AzureADDevice -ObjectId $Device.ObjectId
     }
