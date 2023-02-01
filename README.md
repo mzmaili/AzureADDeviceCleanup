@@ -14,7 +14,7 @@ AzureADDeviceCleanup PowerShell script helps to manage the stale devices in Azur
   - Verifies the stale disabled devices as per the entered threshold days.
   - Cleans the stale devices from Azure AD as per the entered threshold days.
   - Cleans the stale disabled devices only from Azure AD as per the entered threshold days
-  - Checks if ‘MSOnline‘ module is installed and updated. If not, it takes case of this.
+  - Checks if ‘AzureAd‘ module is installed and updated. If not, it takes case of this.
   - Checks if ‘ImportExcel‘ module is installed. If not, it installs and imports it.
   
 
@@ -75,7 +75,7 @@ Using AzureADDeviceCleanup PowerShell script, you can automate Azure AD devices 
 .PARAMETER 
     ThresholdDays 
     Specifies the period of the last login. 
-    Note: The default value is 90 days if this parameter is not configured. 
+    Note: The default value is 180 days if this parameter is not configured. 
  
 .PARAMETER 
     Verify 
@@ -116,7 +116,7 @@ Using AzureADDeviceCleanup PowerShell script, you can automate Azure AD devices 
  
 .EXAMPLE 
     .\AzureADDeviceCleanup.ps1 -Verify 
-    Verifies the stale devices since 90 says that will be deleted when running the PowerShell with 'CleanDevices' parameter. 
+    Verifies the stale devices since 180 says that will be deleted when running the PowerShell with 'CleanDevices' parameter. 
  
 .EXAMPLE 
     .\AzureADDeviceCleanup.ps1 -Verify -ThresholdDays <Number of Days> 
